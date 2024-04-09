@@ -9,6 +9,8 @@ abstract class Tile implements Mappable
 {
     protected string $image = '';
     protected bool $crossable = true;
+    protected int $x;
+    protected int $y;
 
     public function __construct(int $x, int $y)
     {

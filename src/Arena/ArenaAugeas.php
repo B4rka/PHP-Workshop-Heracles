@@ -5,10 +5,12 @@ namespace App\Arena;
 use App\Fighter\Hero;
 use App\Inventory\Shield;
 use App\Inventory\Weapon;
+use App\Inventory\Shovel;
 use App\Tile\Building;
 use App\Tile\Bush;
 use App\Tile\Grass;
 use App\Tile\Water;
+use Exception;
 
 class ArenaAugeas extends Arena
 {
@@ -16,9 +18,11 @@ class ArenaAugeas extends Arena
     {
         $sword = new Weapon(10);
         $shield = new Shield();
+        $shovel = new Shovel();
         $hero = new Hero('Heracles', 0, 0);
         $hero->setWeapon($sword);
         $hero->setShield($shield);
+        $hero->setSecondHand($shovel);
 
         $monsters = [];
 
@@ -138,5 +142,25 @@ class ArenaAugeas extends Arena
         $tiles = [...$waters, ...$grasses, ...$bushes, ...$buildings];
 
         parent::__construct($hero, $monsters, $tiles);
+
+    }
+
+    public function digArena() 
+    {
+        $posX=$this->getHero()->getX();
+        $posY=$this->getHero()->getY();
+        $tile = $this->getTile($posX,$posY);
+
+        if ($tile instanceof Grass)
+        {
+            if($this->getHero()->getSecondHand() !== null) {
+                $this->getTile($posX,$posY)->dig();
+                
+            } else {
+                throw new Exception('You have to have a shovel equipped');
+            }
+        } else {
+            throw new Exception('You can only dig on grass');
+        }
     }
 }
