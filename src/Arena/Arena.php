@@ -6,9 +6,10 @@ use App\Fighter\Fighter;
 use App\Fighter\Hero;
 use App\Movable;
 use App\Tile\Tile;
+use App\Tile\Water;
 use Exception;
 
-class Arena
+abstract class Arena
 {
     public const DIRECTIONS = [
         'N' => [0, -1],
@@ -145,4 +146,18 @@ class Arena
     {
         return $this->tiles;
     }
+
+    public function addTile(Tile $tile)
+    {
+        $new = new Water($tile->getX(), $tile->getY());
+        $this->tiles[]=$new;
+    }
+
+    public function removeTile(Tile $tile)
+    {
+        $key = array_search($tile, $this->tiles);
+        unset($this->tiles[$key]);
+    }
+
+    abstract function isVictory();
 }

@@ -10,10 +10,14 @@ use App\Tile\Building;
 use App\Tile\Bush;
 use App\Tile\Grass;
 use App\Tile\Water;
+use App\Tile\Tile;
 use Exception;
 
 class ArenaAugeas extends Arena
 {
+    const VICTORY_X = 5;
+    const VICTORY_Y = 7;
+
     public function __construct()
     {
         $sword = new Weapon(10);
@@ -154,13 +158,59 @@ class ArenaAugeas extends Arena
         if ($tile instanceof Grass)
         {
             if($this->getHero()->getSecondHand() !== null) {
-                $this->getTile($posX,$posY)->dig();
-                
+                $dig = $this->getTile($posX,$posY);
+                $dig->dig();
+                $this->fill($this->getTile($posX,$posY));
+                // var_dump($this->getTiles());
             } else {
                 throw new Exception('You have to have a shovel equipped');
             }
         } else {
             throw new Exception('You can only dig on grass');
+        }
+    }
+
+    private function fill(Tile $tile)
+    {
+        foreach($this->getAdjacentTiles($tile) as $tiles) {
+            if ($tiles instanceof Water){
+                $this->replaceTile($tile);
+                foreach($this->getAdjacentTiles($tile) as $adja) {
+                    // var_dump($adja);
+                    if ($adja instanceof Grass && $adja->isDigged()){
+                        $this->fill($adja);
+                    }
+                }
+            }
+        }
+    }
+
+    private function getAdjacentTiles(Tile $tile)
+    {
+        $tileX=$tile->getX();
+        $tileY=$tile->getY();
+        $adjXUp = $tileX + 1;
+        $adjXDown = $tileX - 1;
+        $adjYUp = $tileY + 1;
+        $adjYDown = $tileY - 1;
+        $adjN = $this->getTile($tileX, $adjYDown);
+        $adjS = $this->getTile($tileX, $adjYUp);
+        $adjE = $this->getTile($adjXUp, $tileY);
+        $adjW = $this->getTile($adjXDown, $tileY);
+        $adjacents = [$adjN, $adjS, $adjE, $adjW];
+        return $adjacents;
+    }
+
+    public function replaceTile(Tile $newTile)
+    {
+        $this->removeTile($newTile);
+        $this->addTile($newTile);
+    }
+
+    public function isVictory()
+    {
+        if ($this->getTile(self::VICTORY_X, self::VICTORY_Y) instanceof Water) {
+            return true;
         }
     }
 }
